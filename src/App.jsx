@@ -1,10 +1,11 @@
 import './App.css'
+import { VscCopilot } from "react-icons/vsc";
 
 function App() {
 
   return (
     <>
-      <img src="public/ddegulLeo.png"/>
+      <VscCopilot size={160} />
       <h1 >Hello!</h1>
     </>
   )
