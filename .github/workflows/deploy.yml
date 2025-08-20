@@ -1,0 +1,34 @@
+name: 재배포하기
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 깃허브 레포지터리 불러오기
+        uses: actions/checkout@v4
+
+      - name: 다시 Build하기
+        run: |
+          npm i
+          npm run build
+      
+      - name: AWS 인증 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: S3 기존 파일들 삭제
+        run: aws s3 rm --recursive s3://vite-react-aws
+
+      - name: S3에 새로 빌드된 파일 업로드하기
+        run: aws s3 cp ./dist s3://vite-react-aws/ --recursive
+
+      - name: CloudFront 무효화
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
